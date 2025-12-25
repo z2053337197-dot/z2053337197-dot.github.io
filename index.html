@@ -1,0 +1,1150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>英语翻牌配对 加油每一天</title>
+  <style>
+    :root { --bg:#0b0d12; --card:#141826; --card2:#0f1320; --txt:#e9eefc; --mut:#9aa6c2; --ok:#28d17c; --bad:#ff5c7a; --line:#222943; }
+    *{box-sizing:border-box;font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, PingFang SC, Microsoft YaHei, Arial;}
+    body{margin:0; background:linear-gradient(180deg,#0b0d12,#0b0d12 40%,#080a10); color:var(--txt); min-height:100vh;}
+    .wrap{max-width:980px; margin:0 auto; padding:20px;}
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+
+.topbar h1{ margin:0; }
+
+#audioControls{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+#audioControls input[type="range"]{
+  width:110px;
+}
+
+    h1{font-size:20px; margin:0 0 14px;}
+    .tabs{display:flex; gap:10px; margin-bottom:14px;}
+    .tab{padding:10px 12px; border:1px solid var(--line); background:rgba(255,255,255,0.02); color:var(--txt); border-radius:12px; cursor:pointer;}
+    .tab.active{border-color:#3b4a7a; background:rgba(120,160,255,0.10);}
+    .panel{border:1px solid var(--line); background:rgba(255,255,255,0.03); border-radius:16px; padding:16px;}
+    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
+    label{font-size:12px; color:var(--mut);}
+    input, select, textarea, button{
+      border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,0.04);
+      color:var(--txt); padding:10px 12px; outline:none;
+    }
+    textarea{width:100%; min-height:160px; resize:vertical; line-height:1.5;}
+    button{cursor:pointer;}
+    button.primary{background:rgba(120,160,255,0.18); border-color:#3b4a7a;}
+    button.danger{background:rgba(255,92,122,0.15); border-color:#6a2a3a;}
+    .hint{font-size:12px; color:var(--mut); margin-top:8px; line-height:1.6;}
+    .grid{
+      display:grid; gap:12px; margin-top:14px;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border:1px solid var(--line);
+      border-radius:16px; min-height:86px;
+      display:flex; align-items:center; justify-content:center;
+      padding:10px;
+      user-select:none;
+      cursor:pointer;
+      transition:transform .08s ease, border-color .2s ease, background .2s ease;
+    }
+    .card:active{transform:scale(0.99);}
+    .card.faceDown{
+      background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    }
+    .card.matched{
+      border-color:rgba(40,209,124,0.55);
+      background:rgba(40,209,124,0.10);
+      cursor:default;
+    }
+    .cardText{font-size:14px; text-align:center; line-height:1.25; word-break:break-word;}
+    .meta{display:flex; gap:14px; margin-top:10px; color:var(--mut); font-size:12px;}
+    .pill{border:1px solid var(--line); padding:6px 10px; border-radius:999px; background:rgba(255,255,255,0.03);}
+    .toast{margin-top:10px; font-size:12px;}
+    .toast.ok{color:var(--ok);}
+    .toast.bad{color:var(--bad);}
+    .footerBtns{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+    .hr{height:1px; background:var(--line); margin:14px 0;}
+    .small{font-size:12px; color:var(--mut);}
+    @media (max-width:560px){
+      .grid{grid-template-columns: repeat(2, minmax(0,1fr));}
+      .card{min-height:78px;}
+    }
+/* ===== THEME OVERRIDE (paste at END of <style>) ===== */
+:root{
+  /* 全局配色（你想换色，就改这里） */
+  --bgA: #0b1020;
+  --bgB: #06243a;
+  --text: #eaf2ff;
+  --muted: rgba(234,242,255,.72);
+
+  --surface: rgba(255,255,255,.07);
+  --surface2: rgba(255,255,255,.10);
+
+  --accent: #5eead4;
+  --danger: #fb7185;
+  --ok: #34d399;
+
+
+  /* 卡牌背面“图片”（默认内置一张几何图案，不用额外文件） */
+  --card-back-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cdefs%3E%3CradialGradient id='g' cx='30%25' cy='20%25' r='80%25'%3E%3Cstop offset='0' stop-color='%235eead4' stop-opacity='.55'/%3E%3Cstop offset='1' stop-color='%230b1020' stop-opacity='1'/%3E%3C/radialGradient%3E%3Cpattern id='p' width='40' height='40' patternUnits='userSpaceOnUse'%3E%3Cpath d='M0 20H40M20 0V40' stroke='%23eaf2ff' stroke-opacity='.12' stroke-width='2'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='320' height='320' fill='url(%23g)'/%3E%3Crect width='320' height='320' fill='url(%23p)'/%3E%3Ccircle cx='250' cy='70' r='46' fill='%23ffffff' fill-opacity='.08'/%3E%3Ccircle cx='80' cy='240' r='68' fill='%23ffffff' fill-opacity='.06'/%3E%3C/svg%3E");
+}
+
+body{
+  color: var(--text);
+  background:
+    radial-gradient(900px 600px at 20% 10%, rgba(94,234,212,.22), transparent 55%),
+    radial-gradient(900px 700px at 85% 20%, rgba(59,130,246,.18), transparent 55%),
+    linear-gradient(160deg, var(--bgA), var(--bgB));
+}
+
+.wrap{
+  max-width: 980px;
+}
+
+.panel, .toast{
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.small, label{
+  color: var(--muted);
+}
+
+.tabs button{
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--text);
+  border-radius: 999px;
+}
+.tabs button.active{
+  background: rgba(94,234,212,.16);
+  border-color: rgba(94,234,212,.35);
+}
+
+button{
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+}
+button:hover{ filter: brightness(1.06); }
+button.primary{
+  background: rgba(94,234,212,.18);
+  border-color: rgba(94,234,212,.40);
+}
+button.danger{
+  background: rgba(251,113,133,.15);
+  border-color: rgba(251,113,133,.35);
+}
+
+.pill{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 999px;
+  color: var(--text);
+}
+
+.grid{
+  gap: 10px;
+}
+
+/* ===== 卡牌样式：背面用“图片”，正面更清爽 ===== */
+.card{
+  position: relative;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 10px 20px rgba(0,0,0,.22);
+  transform: translateZ(0);
+  transition: transform .12s ease, filter .12s ease;
+}
+
+.card:hover{ transform: translateY(-2px); }
+
+/* 盖着时：隐藏文字，显示背面图案 */
+/* 盖着时：隐藏文字，显示背面图案（用 faceDown 表示盖着） */
+.card.faceDown{
+  color: transparent; /* 把•••和文字都隐藏 */
+  text-shadow: none;
+}
+.card.faceDown::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius: 16px;
+  background-image: var(--card-back-image);
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.1) contrast(1.05);
+}
+
+/* 翻开或匹配：不显示背面图案 */
+.card:not(.faceDown)::before,
+.card.matched::before{
+  content:"";
+  display:none;
+}
+
+/* 翻开状态（没有 faceDown）显示正面 */
+.card:not(.faceDown){
+  background: rgba(255,255,255,.10);
+  border-color: rgba(94,234,212,.30);
+  color: var(--text);
+}
+
+/* 匹配状态 */
+.card.matched{
+  background: rgba(52,211,153,.18);
+  border-color: rgba(52,211,153,.40);
+  color: var(--text);
+}
+
+.card.matched{
+  background: rgba(52,211,153,.18);
+  border-color: rgba(52,211,153,.40);
+  color: var(--text);
+}
+/* ===== 修复下拉框（select/option）白底白字看不清 ===== */
+select{
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 12px;
+}
+
+/* 下拉选项列表（关键：option） */
+select option{
+  background: #0b1020;   /* 选项列表背景（深色） */
+  color: #eaf2ff;        /* 选项文字颜色（浅色） */
+}
+
+/* 选中/悬停时（不同浏览器支持不一，但写了更稳） */
+select option:checked{
+  background: #162341;
+  color: #eaf2ff;
+}
+
+  </style>
+
+
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+  <h1>英语翻牌配对（加油每一天）</h1>
+
+  <div id="audioControls">
+    <button id="btnMusic">🔇 音乐：关</button>
+    <input id="musicVol" type="range" min="0" max="1" step="0.01" value="0.35" />
+
+    <button id="btnSfx">🔈 音效：开</button>
+    <input id="sfxVol" type="range" min="0" max="1" step="0.01" value="0.6" />
+  </div>
+</div>
+
+
+    <div class="tabs">
+      <button class="tab active" id="tabPlay">开始游戏</button>
+      <button class="tab" id="tabVocab">词库导入</button>
+    </div>
+
+    <!-- PLAY PANEL -->
+    <div class="panel" id="playPanel">
+      <div class="row" style="justify-content:space-between;">
+        <div class="row">
+          <div>
+            <label>选择词库</label><br/>
+            <select id="vocabSelect"></select>
+          </div>
+          <div>
+            <label>难度</label><br/>
+            <select id="difficulty">
+              <option value="easy">简单（4对 / 2×4）</option>
+              <option value="normal">一般（8对 / 4×4）</option>
+              <option value="hard">困难（18对 / 6×6）</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <button class="primary" id="btnStart">开始</button>
+          <button id="btnRestart">重开本局</button>
+        </div>
+      </div>
+
+      <div class="meta">
+	<div class="pill">本局用时：<span id="timeText">0</span>s</div>
+	<div class="pill">本局步数：<span id="movesText">0</span></div>
+	<div class="pill">本局已配对：<span id="matchText">0</span>/<span id="totalPairsText">0</span></div>
+	<div class="pill">累计配对：<span id="cumPairsText">0</span> 对</div>
+	<div class="pill">累计积分：<span id="scoreText">0</span></div>
+	<div class="pill">累计用时：<span id="cumTimeText">0</span></div>
+      </div>
+
+      <div class="toast" id="statusText"></div>
+
+      <div class="grid" id="grid"></div>
+
+      <div class="footerBtns">
+        <button id="btnBackToMenu">结算本局</button>
+      </div>
+
+      <div class="hint">
+        玩法：一次最多翻两张；同一对（英文↔中文）会锁定；配完所有对数结束。<br/>
+        词库不足时会自动降级：比如你只导入了 5 对，但选择“一般(8对)”会自动变为 5 对局。
+      </div>
+    </div>
+
+    <!-- VOCAB PANEL -->
+    <div class="panel" id="vocabPanel" style="display:none;">
+      <div class="row">
+        <div style="flex:1; min-width:240px;">
+          <label>词库名称（自定义）</label><br/>
+          <div class="row" style="gap:10px; flex-wrap:wrap;">
+  <select id="setSelect" style="min-width:220px;">
+    <option value="__new__">+ 新建词库</option>
+  </select>
+  <input id="setName" placeholder="新建时在这里输入名称，例如：餐厅 / 租房 / 面试" style="flex:1; min-width:240px;" />
+</div>
+
+        </div>
+        <div class="row" style="align-items:flex-end;">
+          <button class="primary" id="btnSaveSet">保存/覆盖词库</button>
+          <button class="danger" id="btnDeleteSet">删除该词库</button>
+	<div class="toast" id="vocabStatusText"></div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <label>批量导入（每行一对）</label>
+      <textarea id="importBox" placeholder="例如：
+apple - 苹果
+rent	租金
+make a reservation - 预订
+I’m looking for a job - 我在找工作"></textarea>
+      <div class="row" style="margin-top:10px;">
+        <input id="csvFile" type="file" accept=".csv,text/csv" />
+        <button id="btnLoadCsv">读取CSV到导入框</button>
+        <span class="small">CSV 两列：en,zh（可有表头）</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <label>备份 / 分享</label>
+      <div class="row" style="margin-top:10px;">
+        <button id="btnExportAllJson">导出全部自定义词库（JSON）</button>
+        <button id="btnExportCurrentTxt">导出当前词库（TXT）</button>
+        <button class="primary" id="btnCopyExport">复制导出内容</button>
+      </div>
+
+      <textarea id="exportBox" placeholder="导出内容会显示在这里（可复制发送给别人）" readonly></textarea>
+
+      <div class="hr"></div>
+
+      <label>导入（粘贴你的 JSON）</label>
+      <textarea id="importShareBox" placeholder='把JSON 粘贴到这里，例如：
+{
+  "version": 1,
+  "sets": {
+    "租房": [{"en":"rent","zh":"租金"}]
+  }
+}'></textarea>
+      <div class="row" style="margin-top:10px;">
+        <button class="primary" id="btnImportShare">导入并覆盖自定义词库</button>
+      </div>
+
+
+      <div class="row" style="margin-top:10px;">
+        <button id="btnParsePreview">解析预览</button>
+        <button id="btnUseSample">填入示例数据</button>
+        <span class="small" id="previewText"></span>
+      </div>
+
+      <div class="hint">
+        支持两种格式：<br/>
+        1）<b>英文 - 中文</b>（中间建议有空格）<br/>
+        2）<b>英文[TAB]中文</b>（更稳，不怕中文里有符号）<br/>
+        自动去重：英文相同（忽略大小写和首尾空格）会保留最后一次导入的那条。
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ---------- Storage ----------
+  const LS_KEY = "mm_vocab_sets_v1";
+  function loadSets() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return {};
+      return JSON.parse(raw) || {};
+    } catch { return {}; }
+  }
+  function saveSets(sets) {
+    localStorage.setItem(LS_KEY, JSON.stringify(sets));
+  }
+ 
+  // ---------- Stats (cumulative) ----------
+const STATS_KEY = "mm_stats_v1";
+
+function loadStats() {
+  try {
+    const raw = localStorage.getItem(STATS_KEY);
+    if (!raw) return { totalPairsMatched: 0, score: 0, totalTimeSeconds: 0 };
+    const obj = JSON.parse(raw);
+    return {
+      totalPairsMatched: Number(obj.totalPairsMatched || 0),
+      score: Number(obj.score || 0),
+      totalTimeSeconds: Number(obj.totalTimeSeconds || 0),
+    };
+  } catch {
+    return { totalPairsMatched: 0, score: 0, totalTimeSeconds: 0 };
+  }
+}
+
+function saveStats(stats) {
+  localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+}
+
+let stats = loadStats();
+
+function formatSeconds(sec) {
+  sec = Math.max(0, Math.floor(sec));
+  const h = String(Math.floor(sec / 3600)).padStart(2, "0");
+  const m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
+  const s = String(sec % 60).padStart(2, "0");
+  return `${h}:${m}:${s}`;
+}
+
+function renderStats() {
+  if (cumPairsText) cumPairsText.textContent = String(stats.totalPairsMatched);
+  if (scoreText) scoreText.textContent = String(stats.score);
+  if (cumTimeText) cumTimeText.textContent = formatSeconds(stats.totalTimeSeconds);
+}
+
+
+  // ---------- Built-in vocab ----------
+  const builtinPairs = [
+    {en:"apple", zh:"苹果"}, {en:"rent", zh:"租金"}, {en:"receipt", zh:"收据"}, {en:"kitchen", zh:"厨房"},
+    {en:"menu", zh:"菜单"}, {en:"reservation", zh:"预订"}, {en:"interview", zh:"面试"}, {en:"salary", zh:"工资"},
+    {en:"shift", zh:"班次"}, {en:"laundry", zh:"洗衣店"}, {en:"deposit", zh:"押金"}, {en:"invoice", zh:"发票"},
+    {en:"commute", zh:"通勤"}, {en:"passport", zh:"护照"}, {en:"appointment", zh:"预约"}, {en:"overtime", zh:"加班"},
+    {en:"ingredient", zh:"食材"}, {en:"customer", zh:"顾客"}, {en:"refund", zh:"退款"}, {en:"contract", zh:"合同"},
+    {en:"yangyongle", zh:"钟勇"},
+
+  ];
+
+  // ---------- Parsing import text ----------
+  function normalizeEn(s){ return s.trim().toLowerCase().replace(/\s+/g, " "); }
+  function parsePairs(text){
+    const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    const outMap = new Map(); // key: normalized en -> {en,zh}
+    const badLines = [];
+    for (const line of lines){
+      let en="", zh="";
+      if (line.includes("\t")) {
+        const parts = line.split("\t").map(x=>x.trim()).filter(Boolean);
+        en = parts[0] || "";
+        zh = parts.slice(1).join(" ") || "";
+      } else if (line.includes(" - ")) {
+        const idx = line.indexOf(" - ");
+        en = line.slice(0, idx).trim();
+        zh = line.slice(idx+3).trim();
+      } else if (line.includes(",")) {
+        // very simple CSV-ish: en,zh
+        const parts = line.split(",").map(x=>x.trim());
+        en = parts[0] || "";
+        zh = parts.slice(1).join(",").trim() || "";
+      } else {
+        badLines.push(line);
+        continue;
+      }
+      if (!en || !zh) { badLines.push(line); continue; }
+      outMap.set(normalizeEn(en), {en: en.trim(), zh: zh.trim()});
+    }
+    return {pairs: Array.from(outMap.values()), badLines};
+  }
+
+  // ---------- UI refs ----------
+  const tabPlay = document.getElementById("tabPlay");
+  const tabVocab = document.getElementById("tabVocab");
+  const playPanel = document.getElementById("playPanel");
+  const vocabPanel = document.getElementById("vocabPanel");
+
+  const vocabSelect = document.getElementById("vocabSelect");
+  const difficulty = document.getElementById("difficulty");
+  const btnStart = document.getElementById("btnStart");
+  const btnRestart = document.getElementById("btnRestart");
+  const btnBackToMenu = document.getElementById("btnBackToMenu");
+
+  const gridEl = document.getElementById("grid");
+  const timeText = document.getElementById("timeText");
+  const movesText = document.getElementById("movesText");
+  const matchText = document.getElementById("matchText");
+  const totalPairsText = document.getElementById("totalPairsText");
+  const statusText = document.getElementById("statusText");
+
+  const setName = document.getElementById("setName");
+  const importBox = document.getElementById("importBox");
+  const btnParsePreview = document.getElementById("btnParsePreview");
+  const btnUseSample = document.getElementById("btnUseSample");
+  const btnSaveSet = document.getElementById("btnSaveSet");
+  const btnDeleteSet = document.getElementById("btnDeleteSet");
+  const previewText = document.getElementById("previewText");
+  const vocabStatusText = document.getElementById("vocabStatusText");
+  const setSelect = document.getElementById("setSelect");
+  const cumTimeText = document.getElementById("cumTimeText");
+
+const btnMusic = document.getElementById("btnMusic");
+const musicVol = document.getElementById("musicVol");
+const btnSfx = document.getElementById("btnSfx");
+const sfxVol = document.getElementById("sfxVol");
+
+
+  // --- stats refs ---
+  const cumPairsText = document.getElementById("cumPairsText");
+  const scoreText = document.getElementById("scoreText");
+
+  // --- csv import refs ---
+  const csvFile = document.getElementById("csvFile");
+  const btnLoadCsv = document.getElementById("btnLoadCsv");
+
+  // --- backup/share refs ---
+  const btnExportAllJson = document.getElementById("btnExportAllJson");
+  const btnExportCurrentTxt = document.getElementById("btnExportCurrentTxt");
+  const btnCopyExport = document.getElementById("btnCopyExport");
+  const exportBox = document.getElementById("exportBox");
+  const importShareBox = document.getElementById("importShareBox");
+  const btnImportShare = document.getElementById("btnImportShare");
+
+// ---------- Audio ----------
+const bgm = new Audio("bgm.mp3");
+bgm.loop = true;
+bgm.volume = 0.35;
+
+let musicOn = false;
+let sfxOn = true;
+let sfxVolume = 0.6;
+
+function updateAudioUI(){
+  if (btnMusic) btnMusic.textContent = musicOn ? "🔊 音乐：开" : "🔇 音乐：关";
+  if (btnSfx) btnSfx.textContent = sfxOn ? "🔈 音效：开" : "🔇 音效：关";
+}
+
+async function toggleMusic(){
+  musicOn = !musicOn;
+  updateAudioUI();
+
+  if (musicOn){
+    try{
+      await bgm.play(); // 必须用户点击后才允许播放
+    }catch(e){
+      musicOn = false;
+      updateAudioUI();
+      if (typeof setStatus === "function"){
+        setStatus("音乐无法播放：请确认 bgm.mp3 与本HTML文件同一文件夹，且文件名一致。", "bad");
+      }
+    }
+  }else{
+    bgm.pause();
+  }
+}
+
+function playSfx(filename){
+  if (!sfxOn) return;
+  try{
+    const a = new Audio(filename);
+    a.volume = sfxVolume;
+    a.play().catch(()=>{});
+  }catch(e){}
+}
+
+function toggleSfx(){
+  sfxOn = !sfxOn;
+  updateAudioUI();
+}
+
+if (btnMusic) btnMusic.onclick = toggleMusic;
+if (btnSfx) btnSfx.onclick = toggleSfx;
+
+if (musicVol){
+  musicVol.oninput = () => {
+    const v = Number(musicVol.value);
+    bgm.volume = isNaN(v) ? 0.35 : v;
+  };
+}
+
+if (sfxVol){
+  sfxVol.oninput = () => {
+    const v = Number(sfxVol.value);
+    sfxVolume = isNaN(v) ? 0.6 : v;
+  };
+}
+
+updateAudioUI();
+
+
+  // ---------- App state ----------
+  let sets = loadSets(); // { setName: [{en,zh}, ...] }
+  const BUILTIN_NAME = "（内置词库）";
+  let game = null;
+  let timerId = null;
+
+  function showTab(which){
+    if (which === "play"){
+      tabPlay.classList.add("active"); tabVocab.classList.remove("active");
+      playPanel.style.display = ""; vocabPanel.style.display = "none";
+    } else {
+      tabVocab.classList.add("active"); tabPlay.classList.remove("active");
+      vocabPanel.style.display = ""; playPanel.style.display = "none";
+    }
+  }
+  tabPlay.onclick = ()=>showTab("play");
+  tabVocab.onclick = ()=>showTab("vocab");
+
+  function refreshVocabSelect(){
+    vocabSelect.innerHTML = "";
+    const optBuiltin = document.createElement("option");
+    optBuiltin.value = "__builtin__";
+    optBuiltin.textContent = BUILTIN_NAME;
+    vocabSelect.appendChild(optBuiltin);
+
+    const names = Object.keys(sets).sort((a,b)=>a.localeCompare(b,"zh"));
+    for (const name of names){
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name + `（${sets[name].length}对）`;
+      vocabSelect.appendChild(opt);
+    }
+  }
+function refreshSetSelect() {
+  if (!setSelect) return;
+
+  const current = setSelect.value || "__new__";
+  setSelect.innerHTML = "";
+
+  // 新建
+  const optNew = document.createElement("option");
+  optNew.value = "__new__";
+  optNew.textContent = "+ 新建词库";
+  setSelect.appendChild(optNew);
+
+  // 已有词库
+  const names = Object.keys(sets).sort((a,b)=>a.localeCompare(b,"zh"));
+  for (const name of names) {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = `${name}（${sets[name].length}对）`;
+    setSelect.appendChild(opt);
+  }
+
+  // 尽量保持之前选择
+  if ([...setSelect.options].some(o => o.value === current)) {
+    setSelect.value = current;
+  } else {
+    setSelect.value = "__new__";
+  }
+}
+
+// 选择某个词库后，把内容加载到编辑区
+if (setSelect) {
+  setSelect.onchange = () => {
+    const name = setSelect.value;
+    if (name === "__new__") {
+      setName.value = "";
+      importBox.value = "";
+      if (previewText) previewText.textContent = "";
+      setStatus("已切换到：新建词库。输入名称并粘贴词对后保存。", "ok");
+      return;
+    }
+
+    // 加载已有词库到编辑框
+    setName.value = name;
+    const arr = sets[name] || [];
+    importBox.value = arr.map(p => `${p.en} - ${p.zh}`).join("\n");
+    if (previewText) previewText.textContent = `已加载「${name}」：${arr.length} 对`;
+    setStatus(`已加载词库「${name}」，现在可直接修改后点保存覆盖。`, "ok");
+  };
+}
+
+  refreshVocabSelect();
+
+  // ---------- Difficulty params ----------
+  const DIFF = {
+    easy: { rows:2, cols:4, pairs:4 },
+    normal:{ rows:4, cols:4, pairs:8 },
+    hard:  { rows:6, cols:6, pairs:18 },
+  };
+
+  // ---------- Game helpers ----------
+  function shuffle(arr){
+    for (let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  function stopTimer(){
+    if (timerId) clearInterval(timerId);
+    timerId = null;
+  }
+
+  function startTimer(){
+    stopTimer();
+    timerId = setInterval(()=>{
+      if (!game || game.status!=="playing") return;
+      const t = Math.floor((Date.now() - game.timeStart)/1000);
+      timeText.textContent = String(t);
+    }, 200);
+  }
+function setStatus(msg, type=""){
+  // 开始游戏页提示
+  if (statusText){
+    statusText.textContent = msg || "";
+    statusText.className = "toast " + (type || "");
+  }
+
+  // 词库导入页提示
+  if (vocabStatusText){
+    vocabStatusText.textContent = msg || "";
+    vocabStatusText.className = "toast " + (type || "");
+  }
+}
+
+
+  function buildDeck(pairs){
+    // pairs: [{en,zh}]
+    const deck = [];
+    pairs.forEach((p, idx)=>{
+      const pairId = idx + 1;
+      deck.push({id:`${pairId}-EN`, pairId, type:"EN", text:p.en, isFaceUp:false, isMatched:false});
+      deck.push({id:`${pairId}-ZH`, pairId, type:"ZH", text:p.zh, isFaceUp:false, isMatched:false});
+    });
+    return shuffle(deck);
+  }
+
+  function renderGrid(){
+    const {rows, cols} = game.layout;
+    gridEl.style.gridTemplateColumns = `repeat(${cols}, minmax(0,1fr))`;
+    gridEl.innerHTML = "";
+    game.deck.forEach((card, index)=>{
+      const el = document.createElement("div");
+      el.className = "card " + (card.isFaceUp || card.isMatched ? "" : "faceDown") + (card.isMatched ? " matched" : "");
+      el.dataset.index = String(index);
+      const text = document.createElement("div");
+      text.className = "cardText";
+      text.textContent = (card.isFaceUp || card.isMatched) ? card.text : "● ● ●";
+      el.appendChild(text);
+      el.onclick = ()=>onCardClick(index);
+      gridEl.appendChild(el);
+    });
+
+    // pad if needed (shouldn't happen if rows*cols matches deck size)
+    const totalSlots = rows*cols;
+    for (let i=game.deck.length;i<totalSlots;i++){
+      const pad = document.createElement("div");
+      pad.className = "card faceDown";
+      pad.style.opacity = "0.25";
+      pad.innerHTML = `<div class="cardText">—</div>`;
+      gridEl.appendChild(pad);
+    }
+  }
+
+  function updateMeta(){
+    movesText.textContent = String(game.moves);
+    matchText.textContent = String(game.matches);
+    totalPairsText.textContent = String(game.totalPairs);
+  }
+
+  function endGame(){
+    game.status = "done";
+    stopTimer();
+    playSfx("win.mp3");
+    addCurrentGameTimeToCumulative();
+    const t = Math.floor((Date.now() - game.timeStart)/1000);
+    setStatus(`完成！用时 ${t}s，步数 ${game.moves}。`, "ok");
+  }
+
+function addCurrentGameTimeToCumulative() {
+  if (!game || !game.timeStart) return;
+  if (game.timeCounted) return; // 防止重复累加
+
+  const elapsed = Math.floor((Date.now() - game.timeStart) / 1000);
+  stats.totalTimeSeconds += Math.max(0, elapsed);
+  saveStats(stats);
+  renderStats();
+
+  game.timeCounted = true;
+}
+
+  function resetPicks(){
+    game.firstPick = null;
+    game.secondPick = null;
+  }
+
+  function onCardClick(index){
+    if (!game || game.status !== "playing") return;
+    if (game.lockBoard) return;
+
+    const c = game.deck[index];
+    if (c.isMatched || c.isFaceUp) return;
+playSfx("flip.mp3");
+
+    c.isFaceUp = true;
+
+    if (game.firstPick === null){
+      game.firstPick = index;
+      setStatus("");
+      renderGrid();
+      return;
+    }
+
+    // second pick
+    game.secondPick = index;
+    game.moves += 1;
+    game.lockBoard = true;
+    renderGrid();
+    updateMeta();
+
+    const a = game.deck[game.firstPick];
+    const b = game.deck[game.secondPick];
+
+    const isMatch = (a.pairId === b.pairId) && (a.type !== b.type);
+
+    if (isMatch){
+      a.isMatched = true; b.isMatched = true;
+      game.matches += 1;
+// 累计配对与累计积分（每对 +10 分）
+      stats.totalPairsMatched += 1;
+      stats.score += 10;
+      saveStats(stats);
+      renderStats();
+      setStatus("匹配成功！", "ok");
+      playSfx("match.mp3");
+      game.lockBoard = false;
+      resetPicks();
+      renderGrid();
+      updateMeta();
+      if (game.matches === game.totalPairs) endGame();
+    } else {
+      setStatus("不匹配～", "bad");
+playSfx("wrong.mp3");
+      setTimeout(()=>{
+        a.isFaceUp = false;
+        b.isFaceUp = false;
+        game.lockBoard = false;
+        resetPicks();
+        renderGrid();
+      }, 900);
+    }
+  }
+
+  function getPairsFromSelection(){
+    const sel = vocabSelect.value;
+    if (sel === "__builtin__") return builtinPairs.slice();
+    return (sets[sel] || []).slice();
+  }
+
+  function startGame(){
+    if (game && game.status === "playing") addCurrentGameTimeToCumulative();
+    const diff = DIFF[difficulty.value] || DIFF.easy;
+    const allPairs = getPairsFromSelection();
+
+    if (allPairs.length < 2){
+      setStatus("词库太少：请先导入至少 2 对词再开始。", "bad");
+      return;
+    }
+
+    let K = diff.pairs;
+    if (allPairs.length < K) K = allPairs.length; // auto downgrade
+
+    const picked = shuffle(allPairs.slice()).slice(0, K);
+    const deck = buildDeck(picked);
+
+    game = {
+      status: "playing",
+      layout: { rows: diff.rows, cols: diff.cols },
+      totalPairs: K,
+      deck,
+      firstPick: null,
+      secondPick: null,
+      lockBoard: false,
+      moves: 0,
+      matches: 0,
+      timeStart: Date.now(),
+    };
+
+    timeText.textContent = "0";
+    setStatus(`开始！当前：${difficulty.options[difficulty.selectedIndex].text}（实际使用 ${K} 对）`);
+    updateMeta();
+    renderGrid();
+    startTimer();
+  }
+
+  btnStart.onclick = startGame;
+ btnRestart.onclick = ()=>{
+  if (game && game.status === "playing") addCurrentGameTimeToCumulative();
+  if (game) startGame();
+};
+  btnBackToMenu.onclick = () => {
+  if (game && game.status === "playing") {
+    const elapsed = Math.floor((Date.now() - game.timeStart) / 1000);
+
+    // 结算进累计用时（你之前加过这个函数）
+    addCurrentGameTimeToCumulative();
+
+    // 结束本局并清空本局显示
+    stopTimer();
+    setStatus(`本局已结算：用时 ${elapsed}s，步数 ${game.moves}，配对 ${game.matches}/${game.totalPairs}。`, "ok");
+  } else {
+    setStatus("当前没有进行中的对局，无需结算。", "");
+  }
+
+  // 回到“开始设置”状态：清空本局数据与牌桌
+  game = null;
+  timeText.textContent = "0";
+  movesText.textContent = "0";
+  matchText.textContent = "0";
+  totalPairsText.textContent = "0";
+  gridEl.innerHTML = "";
+
+  // 可选：把页面滚回顶部（更像“回到设置”）
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+
+  // ---------- Vocab management ----------
+  btnUseSample.onclick = ()=>{
+    importBox.value =
+`apple - 苹果
+rent\t租金
+menu - 菜单
+receipt - 收据
+make a reservation - 预订
+deposit - 押金
+interview - 面试
+shift - 班次`;
+  };
+
+  btnParsePreview.onclick = ()=>{
+    const {pairs, badLines} = parsePairs(importBox.value);
+    previewText.textContent = `解析到 ${pairs.length} 对；无效行 ${badLines.length} 条。`;
+    if (badLines.length){
+      setStatus("有部分行无法解析：请确认使用 TAB 或 ' - ' 分隔。", "bad");
+    } else {
+      setStatus("解析正常，可以保存到词库。", "ok");
+    }
+  };
+
+  btnSaveSet.onclick = ()=>{
+    let name = (setSelect && setSelect.value !== "__new__") ? setSelect.value : setName.value.trim();
+    if (!name){
+      setStatus("请先填写词库名称。", "bad"); return;
+    }
+    const {pairs, badLines} = parsePairs(importBox.value);
+    if (pairs.length < 2){
+      setStatus("导入内容太少：至少需要 2 对词。", "bad"); return;
+    }
+    sets[name] = pairs;
+    saveSets(sets);
+    refreshVocabSelect();
+    refreshSetSelect();
+    if (setSelect) setSelect.value = name;
+
+    setStatus(`已保存词库「${name}」，共 ${pairs.length} 对。`, "ok");
+    previewText.textContent = badLines.length ? `提示：仍有 ${badLines.length} 行无效被忽略。` : "";
+  };
+
+  btnDeleteSet.onclick = ()=>{
+   const name = setSelect ? setSelect.value : setName.value.trim();
+if (!name || name === "__new__" || !sets[name]) {
+  setStatus("请先在下拉框选择要删除的词库。", "bad");
+  return;
+}
+    delete sets[name];
+    saveSets(sets);
+    refreshVocabSelect();
+    refreshSetSelect();
+    setStatus(`已删除词库「${name}」。`, "ok");
+  };
+  // ---------- CSV file import ----------
+  function parseSimpleCsv(text) {
+    // 简化版CSV：只取前两列 en,zh（支持可选表头）
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const pairs = [];
+    let start = 0;
+
+    if (lines[0]) {
+      const first = lines[0].toLowerCase().replace(/\s+/g, "");
+      if (first === "en,zh" || first === "english,chinese") start = 1;
+    }
+
+    for (let i = start; i < lines.length; i++) {
+      const line = lines[i];
+      const idx = line.indexOf(",");
+      if (idx === -1) continue;
+
+      const en = line.slice(0, idx).trim();
+      const zh = line.slice(idx + 1).trim();
+
+      if (en && zh) pairs.push({ en, zh });
+    }
+    return pairs;
+  }
+
+  if (btnLoadCsv) {
+    btnLoadCsv.onclick = () => {
+      const file = csvFile.files && csvFile.files[0];
+      if (!file) { setStatus("请先选择一个 CSV 文件。", "bad"); return; }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = String(reader.result || "");
+        const pairs = parseSimpleCsv(text);
+
+        if (!pairs.length) {
+          setStatus("没解析到词对：请确认 CSV 至少两列（en,zh）。", "bad");
+          return;
+        }
+
+        // 转成导入框最直观的格式（英文 - 中文）
+        importBox.value = pairs.map(p => `${p.en} - ${p.zh}`).join("\n");
+        setStatus(`已读取 CSV：共 ${pairs.length} 对。现在点“保存/覆盖词库”即可。`, "ok");
+        if (previewText) previewText.textContent = `已从CSV填充 ${pairs.length} 对`;
+      };
+      reader.readAsText(file, "utf-8");
+    };
+  }
+
+  // ---------- Backup / Share ----------
+  function downloadText(filename, text, mime="application/json;charset=utf-8") {
+    const blob = new Blob([text], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        ta.remove();
+        return true;
+      } catch {
+        ta.remove();
+        return false;
+      }
+    }
+  }
+
+  function exportAllCustomSetsJson() {
+    const payload = { version: 1, sets };
+    return JSON.stringify(payload, null, 2);
+  }
+
+  function exportCurrentSetTxt() {
+  const name = (setSelect && setSelect.value !== "__new__") ? setSelect.value : setName.value.trim();
+    if (!name) return { ok: false, msg: "请先填写要导出的词库名称（上面的词库名称框）。" };
+    if (!sets[name]) return { ok: false, msg: `找不到词库「${name}」。请确认已保存该词库。` };
+    const lines = sets[name].map(p => `${p.en} - ${p.zh}`);
+    return { ok: true, text: lines.join("\n") };
+  }
+
+  if (btnExportAllJson) {
+    btnExportAllJson.onclick = () => {
+      const json = exportAllCustomSetsJson();
+      exportBox.value = json;
+      downloadText("vocab_sets.json", json);
+      setStatus("已导出：同时已下载 vocab_sets.json（也可复制发送给别人）。", "ok");
+    };
+  }
+
+  if (btnExportCurrentTxt) {
+    btnExportCurrentTxt.onclick = () => {
+      const r = exportCurrentSetTxt();
+      if (!r.ok) { setStatus(r.msg, "bad"); return; }
+      exportBox.value = r.text;
+      downloadText("vocab_set.txt", r.text, "text/plain;charset=utf-8");
+      setStatus("已导出当前词库 TXT（并下载 vocab_set.txt，可复制发送）。", "ok");
+    };
+  }
+
+  if (btnCopyExport) {
+    btnCopyExport.onclick = async () => {
+      const text = (exportBox.value || "").trim();
+      if (!text) { setStatus("导出框是空的：请先点导出按钮。", "bad"); return; }
+      const ok = await copyToClipboard(text);
+      setStatus(ok ? "已复制到剪贴板。" : "复制失败：请手动全选导出框内容复制。", ok ? "ok" : "bad");
+    };
+  }
+
+  if (btnImportShare) {
+    btnImportShare.onclick = () => {
+      const raw = (importShareBox.value || "").trim();
+      if (!raw) { setStatus("请先把 JSON 粘贴到导入框。", "bad"); return; }
+
+      try {
+        const obj = JSON.parse(raw);
+        if (!obj || typeof obj !== "object" || !obj.sets || typeof obj.sets !== "object") {
+          setStatus("JSON 格式不对：需要包含 sets 字段（例如 {version:1, sets:{...}}）。", "bad");
+          return;
+        }
+
+        const newSets = {};
+        for (const [name, arr] of Object.entries(obj.sets)) {
+          if (!Array.isArray(arr)) continue;
+          const cleaned = [];
+          for (const it of arr) {
+            if (!it || typeof it !== "object") continue;
+            const en = (it.en || "").toString().trim();
+            const zh = (it.zh || "").toString().trim();
+            if (en && zh) cleaned.push({ en, zh });
+          }
+          if (cleaned.length) newSets[name] = cleaned;
+        }
+
+        sets = newSets;
+        saveSets(sets);
+        refreshVocabSelect();
+        setStatus("导入成功：已覆盖本机的自定义词库。回到“开始游戏”选择词库即可。", "ok");
+      } catch {
+        setStatus("导入失败：这段内容不是合法 JSON。", "bad");
+      }
+    };
+  }
+
+  // initial
+  setStatus("提示：先用内置词库试玩，或去「词库导入」粘贴你的英文-中文。");
+  refreshSetSelect();
+  renderStats();
+</script>
+</body>
+</html>
